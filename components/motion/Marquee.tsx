@@ -43,6 +43,23 @@ export default function Marquee({
     () => {
       if (prefersReducedMotion() || !track.current) return;
       const el = track.current;
+
+      // An endless tween keeps restyling and repainting the row on every frame
+      // even when it is nowhere near the viewport, and that cost lands on
+      // whatever the visitor is actually looking at (it made the showreel
+      // stutter). So the loop only runs while the row is on screen.
+      let visible = false;
+      const onScreen = { trigger: wrap.current, start: "top bottom", end: "bottom top" };
+      const vis = ScrollTrigger.create({
+        ...onScreen,
+        onToggle: (self) => {
+          visible = self.isActive;
+          if (visible) tween.current?.play();
+          else tween.current?.pause();
+        },
+      });
+      visible = vis.isActive;
+
       const build = () => {
         tween.current?.kill();
         const half = el.scrollWidth / 2;
@@ -53,13 +70,17 @@ export default function Marquee({
           duration: half / speed,
           ease: "none",
           repeat: -1,
+          paused: !visible,
         });
       };
       build();
 
       let st: ScrollTrigger | undefined;
       if (scrollBoost) {
+        // scoped to the row, so scrolling elsewhere on the page doesn't keep
+        // spinning up speed tweens for a marquee nobody can see
         st = ScrollTrigger.create({
+          ...onScreen,
           onUpdate: (self) => {
             const v = Math.min(Math.abs(self.getVelocity()) / 400, 4);
             const dir = self.direction;
@@ -75,6 +96,7 @@ export default function Marquee({
       ro.observe(el);
       return () => {
         ro.disconnect();
+        vis.kill();
         st?.kill();
         tween.current?.kill();
       };

@@ -4,6 +4,17 @@ import { useEffect, useRef } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { prefersReducedMotion } from "@/lib/utils";
 
+// The door is a full-screen layer cut down by a clip-path, rather than a box
+// whose width and height change. Resizing the box forced a layout and a
+// re-clip of the playing video on every scroll frame, which made the reel
+// stutter; animating the clip leaves layout alone. Values are the doorway
+// opening: top, right, bottom, left, then the corner radii (half the door's
+// width, so the crown is a semicircle). Both states keep the same units in
+// the same order so GSAP can interpolate between them.
+const DOOR_DESKTOP = "inset(22svh 37vw 0svh 37vw round 13vw 13vw 0vw 0vw)"; // 26vw wide, 78svh tall
+const DOOR_MOBILE = "inset(36svh 18vw 0svh 18vw round 32vw 32vw 0vw 0vw)"; // 64vw wide, 64svh tall
+const DOOR_OPEN = "inset(0svh 0vw 0svh 0vw round 0vw 0vw 0vw 0vw)";
+
 /**
  * The door. A tall arched doorway stands in the middle of the page showing
  * the reel. As you scroll, the door zooms toward you and opens: it grows and
@@ -37,7 +48,7 @@ export default function GeometricStory() {
       const reduced = prefersReducedMotion();
 
       if (reduced) {
-        gsap.set(door.current, { width: "100vw", height: "100svh", borderTopLeftRadius: 0, borderTopRightRadius: 0 });
+        gsap.set(door.current, { clipPath: DOOR_OPEN });
         gsap.set(video.current, { scale: 1 });
         gsap.set([eyebrow.current, caption.current, flankL.current, flankR.current], { autoAlpha: 0 });
         gsap.set(scrim.current, { autoAlpha: 1 });
@@ -52,11 +63,9 @@ export default function GeometricStory() {
           const { desktop } = ctx.conditions as { desktop: boolean };
           // starting doorway: stands on the floor (bottom of the frame),
           // tall and narrow with an arched crown
-          const w0 = desktop ? "26vw" : "64vw";
-          const h0 = desktop ? "78svh" : "64svh";
-          const r0 = desktop ? "13vw" : "32vw"; // half the width, so the crown is a semicircle
+          const closed = desktop ? DOOR_DESKTOP : DOOR_MOBILE;
 
-          gsap.set(door.current, { width: w0, height: h0, borderTopLeftRadius: r0, borderTopRightRadius: r0 });
+          gsap.set(door.current, { clipPath: closed });
           gsap.set(video.current, { scale: 1.25 });
           const flLines = finale.current ? finale.current.querySelectorAll<HTMLElement>("[data-fl]") : [];
           gsap.set(flLines, { yPercent: 130 });
@@ -92,18 +101,9 @@ export default function GeometricStory() {
             .to(caption.current, { autoAlpha: 0, duration: 0.25 }, 0)
             .to([flankL.current, flankR.current], { autoAlpha: 0, duration: 0.2 }, 0)
             // the door zooms open toward you until it is full-bleed, its crown flattening
-            .to(
-              door.current,
-              {
-                width: "100vw",
-                height: "100svh",
-                borderTopLeftRadius: "0vw",
-                borderTopRightRadius: "0vw",
-                ease: "power2.inOut",
-                duration: 1,
-              },
-              0
-            )
+            // (fromTo with explicit strings: read back from the page, the clip
+            // would come in pixels and no longer line up with the target units)
+            .fromTo(door.current, { clipPath: closed }, { clipPath: DOOR_OPEN, ease: "power2.inOut", duration: 1 }, 0)
             // the scene settles from a slight zoom as the door fills the frame
             .to(video.current, { scale: 1, ease: "power2.out", duration: 1 }, 0)
             // a scrim + closing statement rise over the full-bleed reel
@@ -157,11 +157,7 @@ export default function GeometricStory() {
         </div>
 
         {/* the door */}
-        <div
-          ref={door}
-          className="relative z-[2] overflow-hidden bg-ink will-change-[width,height]"
-          style={{ width: "26vw", height: "78svh", borderTopLeftRadius: "13vw", borderTopRightRadius: "13vw" }}
-        >
+        <div ref={door} className="absolute inset-0 z-[2] overflow-hidden bg-ink" style={{ clipPath: DOOR_DESKTOP }}>
           <video
             ref={video}
             className="h-full w-full object-cover will-change-transform"
