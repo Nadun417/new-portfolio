@@ -65,6 +65,15 @@ export const site = {
   contact: {
     lines: ["Let's", "build", "something", "good."],
     sub: "Have an idea, a role, or a problem worth solving? I answer every message.",
+    form: {
+      name: "Name",
+      email: "Email",
+      message: "Message",
+      send: "Send message",
+      sending: "Sending…",
+      sent: "Thanks, your message is on its way. I'll reply soon.",
+      failed: "That didn't send. Please email me directly at",
+    },
   },
 } as const;
 

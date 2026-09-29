@@ -6,6 +6,7 @@ import { LineReveal, WordReveal } from "@/components/motion/TextReveal";
 import { MagneticLink } from "@/components/motion/Magnetic";
 import CircularTextPro from "@/components/framer/CircularTextPro";
 import Footer from "@/components/layout/Footer";
+import ContactForm from "./ContactForm";
 
 const LINKS = [
   { label: "Email", href: `mailto:${site.email}`, external: false },
@@ -14,8 +15,8 @@ const LINKS = [
 ];
 
 /**
- * The closing scene. Ink ground, the invitation set huge, three magnetic
- * links, and the footer.
+ * The closing scene. Ink ground, the invitation set huge, the contact form
+ * beside three magnetic links, and the footer.
  */
 export default function Contact() {
   const [a, b, c, d] = site.contact.lines;
@@ -39,27 +40,33 @@ export default function Contact() {
           />
         </h2>
 
-        <div className="col-span-12 mt-[clamp(3rem,6vw,5rem)] grid grid-cols-12 items-end gap-6">
-          <div className="col-span-12 md:col-span-5">
-            <WordReveal text={site.contact.sub} as="p" className="max-w-[36ch] text-paper/70" />
-            <MagneticLink href={`mailto:${site.email}`} className="display-sm mt-6 link-line" data-cursor="open" strength={0.2}>
-              {site.email}
-            </MagneticLink>
+        <div className="col-span-12 mt-[clamp(3rem,6vw,5rem)] grid grid-cols-12 gap-x-6 gap-y-14">
+          <div className="col-span-12 flex flex-col justify-between gap-10 md:col-span-5">
+            <div>
+              <WordReveal text={site.contact.sub} as="p" className="max-w-[36ch] text-paper/70" />
+              <MagneticLink href={`mailto:${site.email}`} className="display-sm mt-6 link-line" data-cursor="open" strength={0.2}>
+                {site.email}
+              </MagneticLink>
+            </div>
+
+            <ul className="flex flex-wrap gap-x-10 gap-y-4">
+              {LINKS.map((l) => (
+                <li key={l.label}>
+                  <MagneticLink href={l.href} external={l.external} className="label-sans gap-2 py-3" data-cursor={l.external ? "open" : "text"} strength={0.35}>
+                    <span className="flip">
+                      <span>{l.label}</span>
+                      <span aria-hidden>{l.label}</span>
+                    </span>
+                    <ArrowUpRight size={14} strokeWidth={1.5} className="ml-1" aria-hidden />
+                  </MagneticLink>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          <ul className="col-span-12 flex flex-wrap gap-x-10 gap-y-4 md:col-span-6 md:col-start-7 md:justify-end">
-            {LINKS.map((l) => (
-              <li key={l.label}>
-                <MagneticLink href={l.href} external={l.external} className="label-sans gap-2 py-3" data-cursor={l.external ? "open" : "text"} strength={0.35}>
-                  <span className="flip">
-                    <span>{l.label}</span>
-                    <span aria-hidden>{l.label}</span>
-                  </span>
-                  <ArrowUpRight size={14} strokeWidth={1.5} className="ml-1" aria-hidden />
-                </MagneticLink>
-              </li>
-            ))}
-          </ul>
+          <div className="col-span-12 md:col-span-6 md:col-start-7">
+            <ContactForm />
+          </div>
         </div>
       </div>
       <Footer dark />
