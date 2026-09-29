@@ -90,13 +90,15 @@ export default function TransitionProvider({ children }: { children: ReactNode }
     (href, label) => {
       if (busy) return;
       const [path, hash] = href.split("#");
-      const samePage = (path === "" || path === pathname) && hash;
-      if (samePage) {
-        const target = document.getElementById(hash);
-        if (target) {
-          if (lenis) lenis.scrollTo(target, { offset: 0 });
-          else target.scrollIntoView({ behavior: "smooth" });
-        }
+      // A link to the page we're already on never changes the route, so the
+      // curtain would wait forever for a navigation that doesn't happen.
+      // Scroll instead: to the section for a hash link, to the top otherwise.
+      if (path === "" || path === pathname) {
+        const target = hash ? document.getElementById(hash) : null;
+        if (hash && !target) return;
+        if (lenis) lenis.scrollTo(target ?? 0, { offset: 0 });
+        else if (target) target.scrollIntoView({ behavior: "smooth" });
+        else window.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
       lenis?.stop();
