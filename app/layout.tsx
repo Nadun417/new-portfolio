@@ -21,7 +21,7 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "sw
 const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono", display: "swap" });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://nadun417.github.io"),
+  metadataBase: new URL("https://nadunmathujaportfolio.netlify.app"),
   title: { default: `${site.name} | ${site.role}`, template: `%s | ${site.name}` },
   description: site.roleLine,
   openGraph: {

@@ -54,7 +54,8 @@ both from the full-size originals, which stay out of the repository because of t
   who prefers reduced motion.
 - The custom cursor and magnetic effects switch off on touch screens.
 - Below 1024px, and with reduced motion, the project arc becomes a plain vertical list.
-- `metadataBase` in `app/layout.tsx` should point at the final domain before deploying.
+- The site is live at https://nadunmathujaportfolio.netlify.app. If the domain changes, update
+  `metadataBase` in `app/layout.tsx` so link previews point at the right images.
 
 ## Framer components
 
